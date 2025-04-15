@@ -12,31 +12,54 @@ export default {
 			});
 		}
 
-		const targetUrl = `https://www.carpvs.com/${query}`;
-		let html;
+		const outerUrl = `https://www.carpvs.com/${query}`;
+		let pageHTML;
 
 		try {
-			const res = await fetch(targetUrl);
-			html = await res.text();
+			const outerRes = await fetch(outerUrl);
+			pageHTML = await outerRes.text();
 		} catch (err) {
-			console.error("FETCH ERROR:", err);
-			return new Response(JSON.stringify({ error: "Failed to fetch page" }), {
+			console.error("FETCH ERROR (outer):", err);
+			return new Response(JSON.stringify({ error: "Failed to fetch outer page" }), {
 				status: 500,
 				headers: { "Content-Type": "application/json" },
 			});
 		}
 
-		// Extract content inside <main>, fallback to full HTML
-		const mainText = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i)?.[1] || html;
-		const clean = mainText.replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
-		console.log("CLEANED TEXT SAMPLE:\n", clean.slice(0, 1000));
+		// 🔍 Extract preloadPage .md URL
+		const preloadMatch = pageHTML.match(/window\.preloadPage\s*=\s*fetch\("([^"]+)"/);
+		if (!preloadMatch) {
+			console.error("Could not find preloadPage URL");
+			return new Response(JSON.stringify({ error: "Could not find preloadPage URL" }), {
+				status: 500,
+				headers: { "Content-Type": "application/json" },
+			});
+		}
 
-		// Match the lexDef line and count usage entries
+		const preloadUrl = preloadMatch[1];
+		let mdContent;
+
+		try {
+			const preloadRes = await fetch(preloadUrl);
+			mdContent = await preloadRes.text();
+		} catch (err) {
+			console.error("FETCH ERROR (preload):", err);
+			return new Response(JSON.stringify({ error: "Failed to fetch .md content" }), {
+				status: 500,
+				headers: { "Content-Type": "application/json" },
+			});
+		}
+
+		// 🚿 Scrub the content
+		const clean = mdContent.replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
+		console.log("CLEANED MD SAMPLE:\n", clean.slice(0, 1000));
+
+		// 📚 Match lexDef line
 		const lexDefRegex = /lexDef\s+"([^"]+)"\s+{usage:::+\s*([^}]+)}/i;
 		const match = clean.match(lexDefRegex);
 
 		if (!match) {
-			console.log("❌ No lexDef matched in cleaned text.");
+			console.log("❌ No lexDef matched in .md content.");
 			return new Response(JSON.stringify({ error: "No lexDef found" }), {
 				status: 404,
 				headers: { "Content-Type": "application/json" },
@@ -55,7 +78,7 @@ export default {
 				term,
 				usageTypes,
 				potency,
-				coordinate: targetUrl,
+				coordinate: preloadUrl,
 			}),
 			{ headers: { "Content-Type": "application/json" } }
 		);
