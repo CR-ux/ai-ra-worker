@@ -17,10 +17,13 @@ export default {
 	  // Extract content inside <main>, fallback to full HTML
 	  const mainText = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i)?.[1] || html;
 	  const clean = mainText.replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
-  
+	  console.log("CLEANED TEXT SAMPLE:\n", clean.slice(0, 1000));
+
+	  
 	  // Match the lexDef line and count usage entries
 	  const lexDefRegex = /lexDef\s+"([^"]+)"\s+{usage:::+\s*([^}]+)}/i;
 	  const match = clean.match(lexDefRegex);
+	  
   
 	  if (!match) {
 		return new Response(JSON.stringify({ error: "No lexDef found" }), {
