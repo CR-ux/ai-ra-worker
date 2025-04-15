@@ -1,6 +1,5 @@
 export default {
 	async fetch(request: Request): Promise<Response> {
-
 		if (request.method === "OPTIONS") {
 			return new Response(null, {
 				status: 204,
@@ -11,7 +10,6 @@ export default {
 				}
 			});
 		}
-		console.log(">>> AI:RA WORKER ONLINE <<<");
 
 		const { searchParams } = new URL(request.url);
 		const query = searchParams.get("q");
@@ -19,7 +17,10 @@ export default {
 		if (!query) {
 			return new Response(JSON.stringify({ error: "No query provided" }), {
 				status: 400,
-				headers: { "Content-Type": "application/json" },
+				headers: {
+					"Content-Type": "application/json",
+					"Access-Control-Allow-Origin": "*"
+				}
 			});
 		}
 
@@ -33,17 +34,22 @@ export default {
 			console.error("FETCH ERROR (outer):", err);
 			return new Response(JSON.stringify({ error: "Failed to fetch outer page" }), {
 				status: 500,
-				headers: { "Content-Type": "application/json" },
+				headers: {
+					"Content-Type": "application/json",
+					"Access-Control-Allow-Origin": "*"
+				}
 			});
 		}
 
-		// 🔍 Extract preloadPage .md URL
 		const preloadMatch = pageHTML.match(/window\.preloadPage\s*=\s*\w+\("([^"]+)"/);
 		if (!preloadMatch) {
 			console.error("Could not find preloadPage URL");
 			return new Response(JSON.stringify({ error: "Could not find preloadPage URL" }), {
 				status: 500,
-				headers: { "Content-Type": "application/json" },
+				headers: {
+					"Content-Type": "application/json",
+					"Access-Control-Allow-Origin": "*"
+				}
 			});
 		}
 
@@ -57,23 +63,24 @@ export default {
 			console.error("FETCH ERROR (preload):", err);
 			return new Response(JSON.stringify({ error: "Failed to fetch .md content" }), {
 				status: 500,
-				headers: { "Content-Type": "application/json" },
+				headers: {
+					"Content-Type": "application/json",
+					"Access-Control-Allow-Origin": "*"
+				}
 			});
 		}
 
-		// 🚿 Scrub the content
 		const clean = mdContent.replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
-		console.log("CLEANED MD SAMPLE:\n", clean.slice(0, 1000));
-
-		// 📚 Match lexDef line
 		const lexDefRegex = /lexDef\s+"([^"]+)"\s+{usage:::+\s*([^}]+)}/i;
 		const match = clean.match(lexDefRegex);
 
 		if (!match) {
-			console.log("❌ No lexDef matched in .md content.");
 			return new Response(JSON.stringify({ error: "No lexDef found" }), {
 				status: 404,
-				headers: { "Content-Type": "application/json" },
+				headers: {
+					"Content-Type": "application/json",
+					"Access-Control-Allow-Origin": "*"
+				}
 			});
 		}
 
@@ -82,13 +89,12 @@ export default {
 		const usageTypes = usageBlock.split("||").map(u => u.trim());
 		const potency = usageTypes.length;
 
-		console.log(`✅ Found lexDef "${term}" with ${potency} usage(s):`, usageTypes);
 		return new Response(
 			JSON.stringify({
 				term,
 				usageTypes,
 				potency,
-				coordinate: preloadUrl,
+				coordinate: preloadUrl
 			}),
 			{
 				headers: {
@@ -97,5 +103,5 @@ export default {
 				}
 			}
 		);
-	},
+	}
 };
