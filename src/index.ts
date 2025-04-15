@@ -27,7 +27,7 @@ export default {
 		}
 
 		// 🔍 Extract preloadPage .md URL
-		const preloadMatch = pageHTML.match(/window\.preloadPage\s*=\s*fetch\("([^"]+)"/);
+		const preloadMatch = pageHTML.match(/window\.preloadPage\s*=\s*\w+\("([^"]+)"/);
 		if (!preloadMatch) {
 			console.error("Could not find preloadPage URL");
 			return new Response(JSON.stringify({ error: "Could not find preloadPage URL" }), {
