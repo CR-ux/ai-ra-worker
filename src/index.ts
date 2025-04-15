@@ -10,9 +10,14 @@
  *
  * Learn more at https://developers.cloudflare.com/workers/
  */
-
 export default {
-	async fetch(request, env, ctx): Promise<Response> {
-		return new Response('Hello World!');
+	async fetch(request: Request) {
+	  const url = new URL(request.url);
+	  const q = url.searchParams.get("q");
+  
+	  return new Response(
+		JSON.stringify({ coordinate: `https://carpvs.com/book/${q}` }),
+		{ headers: { "Content-Type": "application/json" } }
+	  );
 	},
-} satisfies ExportedHandler<Env>;
+  };
