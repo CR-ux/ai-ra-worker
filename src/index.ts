@@ -17,7 +17,7 @@ export default {
   
 	  return new Response(
 		JSON.stringify({
-		  coordinate: `https://carpvs.com/book/${q}`,
+		  coordinate: `https://carpvs.com/${q}`,
 		}),
 		{ headers: { "Content-Type": "application/json" } }
 	  );
