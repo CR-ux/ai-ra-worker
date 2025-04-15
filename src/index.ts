@@ -1,7 +1,7 @@
 const corsHeaders = {
 	"Access-Control-Allow-Origin": "*",
 	"Access-Control-Allow-Methods": "GET, OPTIONS",
-	"Access-Control-Allow-Headers": "Content-Type"
+	"Access-Control-Allow-Headers": "Content-Type",
   };
   
   export default {
@@ -9,7 +9,7 @@ const corsHeaders = {
 	  if (request.method === "OPTIONS") {
 		return new Response(null, {
 		  status: 204,
-		  headers: corsHeaders
+		  headers: corsHeaders,
 		});
 	  }
   
@@ -19,10 +19,7 @@ const corsHeaders = {
 	  if (!query) {
 		return new Response(JSON.stringify({ error: "No query provided" }), {
 		  status: 400,
-		  headers: {
-			"Content-Type": "application/json",
-			...corsHeaders
-		  }
+		  headers: { "Content-Type": "application/json", ...corsHeaders },
 		});
 	  }
   
@@ -35,7 +32,7 @@ const corsHeaders = {
 	  } catch (err) {
 		return new Response(JSON.stringify({ error: "Failed to fetch outer page" }), {
 		  status: 500,
-		  headers: { "Content-Type": "application/json", ...corsHeaders }
+		  headers: { "Content-Type": "application/json", ...corsHeaders },
 		});
 	  }
   
@@ -43,7 +40,7 @@ const corsHeaders = {
 	  if (!preloadMatch) {
 		return new Response(JSON.stringify({ error: "Could not find preloadPage URL" }), {
 		  status: 500,
-		  headers: { "Content-Type": "application/json", ...corsHeaders }
+		  headers: { "Content-Type": "application/json", ...corsHeaders },
 		});
 	  }
   
@@ -56,7 +53,7 @@ const corsHeaders = {
 	  } catch (err) {
 		return new Response(JSON.stringify({ error: "Failed to fetch .md content" }), {
 		  status: 500,
-		  headers: { "Content-Type": "application/json", ...corsHeaders }
+		  headers: { "Content-Type": "application/json", ...corsHeaders },
 		});
 	  }
   
@@ -69,17 +66,17 @@ const corsHeaders = {
 	  let potency = 0;
 	  let fallback = null;
   
-	  let match = clean.match(strictRegex);
+	  const match = clean.match(strictRegex);
   
 	  if (match) {
 		term = match[1];
 		const usageBlock = match[2];
-		usageTypes = usageBlock.split("||").map(u => u.trim());
+		usageTypes = usageBlock.split("||").map((u) => u.trim());
 		potency = usageTypes.length;
 	  } else {
 		const footnoteMatch = clean.match(footnoteRegex);
 		if (footnoteMatch) {
-		  usageTypes = footnoteMatch[1].split("||").map(u => u.trim());
+		  usageTypes = footnoteMatch[1].split("||").map((u) => u.trim());
 		  potency = usageTypes.length;
 		  fallback = footnoteMatch[2].trim();
 		} else {
@@ -87,29 +84,28 @@ const corsHeaders = {
 		  if (loose) {
 			fallback = loose[0].trim();
 		  } else {
-			return new Response(JSON.stringify({ error: "No lexDef found" }), {
-			  status: 404,
-			  headers: { "Content-Type": "application/json", ...corsHeaders }
-			});
+			// No lexDef *at all*, return fallback as entire .md file (cleaned)
+			fallback = clean.slice(0, 2000); // truncate for safety
 		  }
 		}
 	  }
   
 	  const valency = [...clean.matchAll(/lexDef\s+/g)].length;
-	  const links = [...mdContent.matchAll(/\[\[([^\]]+)\]\]/g)].map(m => m[1]);
-
-
+	  const links = [...mdContent.matchAll(/\[\[([^\]]+)\]\]/g)].map((m) => m[1]);
   
-	  return new Response(JSON.stringify({
-		term,
-		usageTypes,
-		potency,
-		valency,
-		fallback,
-		coordinate: preloadUrl,
-		links
-	  }), {
-		headers: { "Content-Type": "application/json", ...corsHeaders }
-	  });
-	}
+	  return new Response(
+		JSON.stringify({
+		  term,
+		  usageTypes,
+		  potency,
+		  valency,
+		  fallback,
+		  coordinate: preloadUrl,
+		  links,
+		}),
+		{
+		  headers: { "Content-Type": "application/json", ...corsHeaders },
+		}
+	  );
+	},
   };
