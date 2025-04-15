@@ -75,25 +75,44 @@ const corsHeaders = {
 	  const clean = mdContent.replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
 	  const lexDefRegex = /lexDef\s+"([^"]+)"\s+{usage:::+\s*([^}]+)}/i;
 	  const match = clean.match(lexDefRegex);
-  
-	  if (!match) {
-		return new Response(JSON.stringify({ error: "No lexDef found" }), {
-		  status: 404,
-		  headers: {
-			"Content-Type": "application/json",
-			...corsHeaders
-		  }
-		});
+	  
+	  let term = null;
+	  let usageTypes: string[] = [];
+	  let potency = 0;
+	  let fallback = null;
+	  
+	  if (match) {
+		term = match[1];
+		const usageBlock = match[2];
+		usageTypes = usageBlock.split("||").map(u => u.trim());
+		potency = usageTypes.length;
+	  } else {
+		// fallback: return sentence containing 'lexDef'
+		const looseMatch = clean.match(/[^.?!]*\blexDef\b[^.?!]*[.?!]/i);
+		if (looseMatch) {
+		  fallback = looseMatch[0];
+		} else {
+		  return new Response(JSON.stringify({ error: "No lexDef found" }), {
+			status: 404,
+			headers: {
+			  "Content-Type": "application/json",
+			  ...corsHeaders
+			}
+		  });
+		}
 	  }
-  
-	  const term = match[1];
-	  const usageBlock = match[2];
-	  const usageTypes = usageBlock.split("||").map(u => u.trim());
-	  const potency = usageTypes.length;
+	  
 	  const lexDefMatches = [...clean.matchAll(/lexDef\s+"/g)];
 	  const valency = lexDefMatches.length;
-  
-	  return new Response(JSON.stringify({ term, usageTypes, potency, valency, coordinate: preloadUrl }), {
+	  
+	  return new Response(JSON.stringify({
+		term,
+		usageTypes,
+		potency,
+		valency,
+		fallback,
+		coordinate: preloadUrl
+	  }), {
 		headers: { "Content-Type": "application/json", ...corsHeaders }
 	  });;
 	}
