@@ -19,8 +19,7 @@ export default {
 	  const clean = mainText.replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
   
 	  // Match the lexDef and its parts
-	  const lexDefRegex = /lexDef\s+"(.*?)"\s+{usage:::+\s*(\w+)}\s*<\s*N\.B\.\s*"([^"]+)"\[\^([^\]]+)]/i;
-	  const lexMatch = clean.match(lexDefRegex);
+	  const lexDefRegex = /lexDef\s+"(.*?)"\s+{usage:::+\s*(\w+)\s*}\s*<\s*N\.B\.\s*"([^"]+)"\[\^([^\]]+)]/i;	  const lexMatch = clean.match(lexDefRegex);
   
 	  if (!lexMatch) {
 		return new Response(JSON.stringify({ error: "No lexDef found" }), {
