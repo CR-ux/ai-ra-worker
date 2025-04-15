@@ -1,25 +1,32 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Bind resources to your worker in `wrangler.jsonc`. After adding bindings, a type definition for the
- * `Env` object can be regenerated with `npm run cf-typegen`.
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
 export default {
-	async fetch(request: Request) {
+	async fetch(request: Request): Promise<Response> {
 	  const url = new URL(request.url);
-	  const q = url.searchParams.get("q") || "null";
+	  const q = url.searchParams.get("q") || "index";
   
-	  return new Response(
-		JSON.stringify({
-		  coordinate: `https://carpvs.com/${q}`,
-		}),
-		{ headers: { "Content-Type": "application/json" } }
-	  );
+	  const targetUrl = `https://carpvs.com/${q}`;
+  
+	  try {
+		const res = await fetch(targetUrl);
+		const html = await res.text();
+  
+		// Snip the first 300 characters of raw HTML as a teaser
+		const snippet = html.substring(0, 300);
+  
+		return new Response(
+		  JSON.stringify({
+			coordinate: targetUrl,
+			snippet
+		  }),
+		  { headers: { "Content-Type": "application/json" } }
+		);
+	  } catch (e) {
+		return new Response(
+		  JSON.stringify({
+			error: "Failed to fetch Book",
+			coordinate: targetUrl
+		  }),
+		  { status: 500, headers: { "Content-Type": "application/json" } }
+		);
+	  }
 	},
   };
