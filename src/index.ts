@@ -90,20 +90,11 @@ const corsHeaders = {
 	  const usageBlock = match[2];
 	  const usageTypes = usageBlock.split("||").map(u => u.trim());
 	  const potency = usageTypes.length;
+	  const lexDefMatches = [...clean.matchAll(/lexDef\s+"/g)];
+	  const valency = lexDefMatches.length;
   
-	  return new Response(
-		JSON.stringify({
-		  term,
-		  usageTypes,
-		  potency,
-		  coordinate: preloadUrl
-		}),
-		{
-		  headers: {
-			"Content-Type": "application/json",
-			...corsHeaders
-		  }
-		}
-	  );
+	  return new Response(JSON.stringify({ term, usageTypes, potency, valency, coordinate: preloadUrl }), {
+		headers: { "Content-Type": "application/json", ...corsHeaders }
+	  });;
 	}
   };
