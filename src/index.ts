@@ -58,36 +58,34 @@ const corsHeaders = {
 	  const strictRegex = /lexDef\s+"([^"]+)"\s+{usage:::+\s*([^}]+)}/i;
 	  const footnoteRegex = /\[\^\w+]:\s*lexDef\s*{usage:::+\s*([^}]+)}\s*(.*?)\s*(?=\[\^|\n|$)/i;
   
-	  let term = null;
+	  let term = query;
 	  let usageTypes: string[] = [];
 	  let potency = 0;
-	  let fallback = null;
+	  let fallback = "";
+	  let valency = 0;
   
-	  let match = clean.match(strictRegex);
+	  const strictMatch = clean.match(strictRegex);
+	  const footnoteMatch = clean.match(footnoteRegex);
   
-	  if (match) {
-		term = match[1];
-		const usageBlock = match[2];
-		usageTypes = usageBlock.split("||").map((u) => u.trim());
+	  if (strictMatch) {
+		term = strictMatch[1];
+		usageTypes = strictMatch[2].split("||").map((u) => u.trim());
+		potency = usageTypes.length;
+	  } else if (footnoteMatch) {
+		usageTypes = footnoteMatch[1].split("||").map((u) => u.trim());
+		fallback = footnoteMatch[2].trim();
 		potency = usageTypes.length;
 	  } else {
-		const footnoteMatch = clean.match(footnoteRegex);
-		if (footnoteMatch) {
-		  usageTypes = footnoteMatch[1].split("||").map((u) => u.trim());
-		  potency = usageTypes.length;
-		  fallback = footnoteMatch[2].trim();
-		} else {
-		  const loose = clean.match(/[^.?!]*\blexDef\b[^.?!]*[.?!]/i);
-		  if (loose) fallback = loose[0].trim();
-		}
+		const loose = clean.match(/[^.?!]*\blexDef\b[^.?!]*[.?!]/i);
+		fallback = loose?.[0].trim() || "(No lexDef found, but this Book exists.)";
 	  }
   
-	  const valency = [...clean.matchAll(/lexDef\s+/g)].length;
+	  valency = [...clean.matchAll(/lexDef\s+/g)].length;
 	  const links = [...mdContent.matchAll(/\[\[([^\]]+)\]\]/g)].map((m) => m[1]);
   
 	  return new Response(
 		JSON.stringify({
-		  term: term || query,
+		  term,
 		  usageTypes,
 		  potency,
 		  valency,
@@ -95,7 +93,9 @@ const corsHeaders = {
 		  coordinate: preloadUrl,
 		  links,
 		}),
-		{ headers: { "Content-Type": "application/json", ...corsHeaders } }
+		{
+		  headers: { "Content-Type": "application/json", ...corsHeaders },
+		}
 	  );
 	},
   };
