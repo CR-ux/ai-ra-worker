@@ -1,5 +1,16 @@
 export default {
 	async fetch(request: Request): Promise<Response> {
+
+		if (request.method === "OPTIONS") {
+			return new Response(null, {
+				status: 204,
+				headers: {
+					"Access-Control-Allow-Origin": "*",
+					"Access-Control-Allow-Methods": "GET, OPTIONS",
+					"Access-Control-Allow-Headers": "Content-Type"
+				}
+			});
+		}
 		console.log(">>> AI:RA WORKER ONLINE <<<");
 
 		const { searchParams } = new URL(request.url);
@@ -72,7 +83,6 @@ export default {
 		const potency = usageTypes.length;
 
 		console.log(`✅ Found lexDef "${term}" with ${potency} usage(s):`, usageTypes);
-
 		return new Response(
 			JSON.stringify({
 				term,
@@ -80,7 +90,12 @@ export default {
 				potency,
 				coordinate: preloadUrl,
 			}),
-			{ headers: { "Content-Type": "application/json" } }
+			{
+				headers: {
+					"Content-Type": "application/json",
+					"Access-Control-Allow-Origin": "*"
+				}
+			}
 		);
 	},
 };
