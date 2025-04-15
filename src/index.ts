@@ -13,10 +13,12 @@
 export default {
 	async fetch(request: Request) {
 	  const url = new URL(request.url);
-	  const q = url.searchParams.get("q");
+	  const q = url.searchParams.get("q") || "null";
   
 	  return new Response(
-		JSON.stringify({ coordinate: `https://carpvs.com/book/${q}` }),
+		JSON.stringify({
+		  coordinate: `https://carpvs.com/book/${q}`,
+		}),
 		{ headers: { "Content-Type": "application/json" } }
 	  );
 	},
