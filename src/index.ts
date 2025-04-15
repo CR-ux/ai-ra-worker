@@ -102,6 +102,7 @@ const corsHeaders = {
 		  fallback,
 		  coordinate: preloadUrl,
 		  links,
+		  content: clean.slice(0, 5000) // limit to prevent overload
 		}),
 		{
 		  headers: { "Content-Type": "application/json", ...corsHeaders },
