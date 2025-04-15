@@ -7,10 +7,7 @@ const corsHeaders = {
   export default {
 	async fetch(request: Request): Promise<Response> {
 	  if (request.method === "OPTIONS") {
-		return new Response(null, {
-		  status: 204,
-		  headers: corsHeaders,
-		});
+		return new Response(null, { status: 204, headers: corsHeaders });
 	  }
   
 	  const { searchParams } = new URL(request.url);
@@ -29,7 +26,7 @@ const corsHeaders = {
 	  try {
 		const outerRes = await fetch(outerUrl);
 		pageHTML = await outerRes.text();
-	  } catch (err) {
+	  } catch {
 		return new Response(JSON.stringify({ error: "Failed to fetch outer page" }), {
 		  status: 500,
 		  headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -50,7 +47,7 @@ const corsHeaders = {
 	  try {
 		const preloadRes = await fetch(preloadUrl);
 		mdContent = await preloadRes.text();
-	  } catch (err) {
+	  } catch {
 		return new Response(JSON.stringify({ error: "Failed to fetch .md content" }), {
 		  status: 500,
 		  headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -66,7 +63,7 @@ const corsHeaders = {
 	  let potency = 0;
 	  let fallback = null;
   
-	  const match = clean.match(strictRegex);
+	  let match = clean.match(strictRegex);
   
 	  if (match) {
 		term = match[1];
@@ -81,12 +78,7 @@ const corsHeaders = {
 		  fallback = footnoteMatch[2].trim();
 		} else {
 		  const loose = clean.match(/[^.?!]*\blexDef\b[^.?!]*[.?!]/i);
-		  if (loose) {
-			fallback = loose[0].trim();
-		  } else {
-			// No lexDef *at all*, return fallback as entire .md file (cleaned)
-			fallback = clean.slice(0, 2000); // truncate for safety
-		  }
+		  if (loose) fallback = loose[0].trim();
 		}
 	  }
   
@@ -95,18 +87,15 @@ const corsHeaders = {
   
 	  return new Response(
 		JSON.stringify({
-		  term,
+		  term: term || query,
 		  usageTypes,
 		  potency,
 		  valency,
 		  fallback,
 		  coordinate: preloadUrl,
 		  links,
-		  content: clean.slice(0, 5000) // limit to prevent overload
 		}),
-		{
-		  headers: { "Content-Type": "application/json", ...corsHeaders },
-		}
+		{ headers: { "Content-Type": "application/json", ...corsHeaders } }
 	  );
 	},
   };
