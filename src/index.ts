@@ -96,6 +96,9 @@ const corsHeaders = {
 	  }
   
 	  const valency = [...clean.matchAll(/lexDef\s+/g)].length;
+	  const links = [...mdContent.matchAll(/\[\[([^\]]+)\]\]/g)].map(m => m[1]);
+
+
   
 	  return new Response(JSON.stringify({
 		term,
@@ -103,7 +106,8 @@ const corsHeaders = {
 		potency,
 		valency,
 		fallback,
-		coordinate: preloadUrl
+		coordinate: preloadUrl,
+		links
 	  }), {
 		headers: { "Content-Type": "application/json", ...corsHeaders }
 	  });
