@@ -1,7 +1,7 @@
 export default {
 	async fetch(request: Request): Promise<Response> {
 	  const url = new URL(request.url);
-	  const q = url.searchParams.get("q") || "index";
+	  const q = url.searchParams.get("q") || "lexDict";
   
 	  const targetUrl = `https://carpvs.com/${q}`;
   
@@ -10,7 +10,7 @@ export default {
 		const html = await res.text();
   
 		// Snip the first 300 characters of raw HTML as a teaser
-		const snippet = html.substring(0, 300);
+		const snippet = html.substring(0, 500);
   
 		return new Response(
 		  JSON.stringify({
