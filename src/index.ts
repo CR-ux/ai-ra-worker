@@ -92,6 +92,7 @@ const corsHeaders = {
 		  valency,
 		  fallback,
 		  fall,
+		  markdown: mdContent,
 		  coordinate: preloadUrl,
 		  links,
 		}),
