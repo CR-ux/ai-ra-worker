@@ -78,7 +78,7 @@ const corsHeaders = {
 		fallback = footnoteMatch[2].trim();
 		potency = usageTypes.length;
 	  } else {
-		fallback = mdContent.trim() || "(No lexDef found, but this Book exists.)";
+		fallback = fall || "(No lexDef found, but this Book exists.)";
 	  }
   
 	  valency = [...clean.matchAll(/lexDef\s+/g)].length;
