@@ -91,6 +91,7 @@ const corsHeaders = {
 		  potency,
 		  valency,
 		  fallback,
+		  fall,
 		  coordinate: preloadUrl,
 		  links,
 		}),
