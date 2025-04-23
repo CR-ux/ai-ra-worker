@@ -15,7 +15,7 @@ const corsHeaders = {
 	  const rawQuery = searchParams.get("q");
 	  let query = decodeURIComponent((rawQuery || "").trim().replace(/^\/+|\/+$/g, ""));
 	  let queryPath = query;
-  
+
 	  if (!query) {
 		return new Response(JSON.stringify({ error: "No query provided" }), {
 		  status: 400,
