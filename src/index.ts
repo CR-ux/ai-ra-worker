@@ -76,8 +76,15 @@ const corsHeaders = {
 		});
 	  }
   
-	  const clean = mdContent.replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
-	  const fall = mdContent.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+	  let clean = "";
+	  let fall = "";
+	  if (filename.endsWith(".md")) {
+		clean = mdContent.replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
+		fall = clean.trim();
+	  } else {
+		clean = "";
+		fall = "(This appears to be a non-Markdown page or an invalid lexDef file.)";
+	  }
 	  const strictRegex = /lexDef\s+"([^"]+)"\s+{usage:::+\s*([^}]+)}/i;
 	  const footnoteRegex = /\[\^\w+]:\s*lexDef\s*{usage:::+\s*([^}]+)}\s*(.*?)\s*(?=\[\^|\n|$)/i;
   
