@@ -4,6 +4,7 @@ const corsHeaders = {
 	"Access-Control-Allow-Headers": "Content-Type",
   };
   
+  
   export default {
 	async fetch(request: Request): Promise<Response> {
 	  if (request.method === "OPTIONS") {
@@ -12,7 +13,8 @@ const corsHeaders = {
   
 	  const { searchParams } = new URL(request.url);
 	  const rawQuery = searchParams.get("q");
-	  const query = decodeURIComponent((rawQuery || "").trim().replace(/^\/+|\/+$/g, ""));
+	  let query = decodeURIComponent((rawQuery || "").trim().replace(/^\/+|\/+$/g, ""));
+	  let queryPath = query;
   
 	  if (!query) {
 		return new Response(JSON.stringify({ error: "No query provided" }), {
@@ -21,17 +23,35 @@ const corsHeaders = {
 		});
 	  }
   
-	  const outerUrl = `https://www.carpvs.com/${query}`;
 	  let pageHTML;
+	  const outerUrlInitial = `https://www.carpvs.com/${query}`;
   
 	  try {
-		const outerRes = await fetch(outerUrl);
+		const outerRes = await fetch(outerUrlInitial);
 		pageHTML = await outerRes.text();
 	  } catch {
 		return new Response(JSON.stringify({ error: "Failed to fetch outer page" }), {
 		  status: 500,
 		  headers: { "Content-Type": "application/json", ...corsHeaders },
 		});
+	  }
+	  // Attempt to extract a permalink from the page's HTML if a matching one exists
+	  const permalinkMatch = pageHTML.match(new RegExp(`<meta name="permalink" content="([^"]*${query}[^"]*)"`));
+	  if (permalinkMatch) {
+		queryPath = permalinkMatch[1];
+	  }
+	  const outerUrl = `https://www.carpvs.com/${queryPath}`;
+	  // If the initial fetch was not for the resolved queryPath, refetch pageHTML
+	  if (queryPath !== query) {
+		try {
+		  const outerRes = await fetch(outerUrl);
+		  pageHTML = await outerRes.text();
+		} catch {
+		  return new Response(JSON.stringify({ error: "Failed to fetch outer page by permalink" }), {
+			status: 500,
+			headers: { "Content-Type": "application/json", ...corsHeaders },
+		  });
+		}
 	  }
   
 	  const preloadMatch = pageHTML.match(/window\.preloadPage\s*=\s*\w+\("([^"]+)"/);
@@ -42,7 +62,8 @@ const corsHeaders = {
 		});
 	  }
   
-	  const preloadUrl = preloadMatch[1];
+	  const filename = preloadMatch[1].split('/').pop();
+	  const preloadUrl = `https://www.carpvs.com/lexDefs/${filename}`;
 	  let mdContent;
   
 	  try {
