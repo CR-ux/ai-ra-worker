@@ -56,10 +56,32 @@ const corsHeaders = {
   
 	  const preloadMatch = pageHTML.match(/window\.preloadPage\s*=\s*\w+\("([^"]+)"/);
 	  if (!preloadMatch) {
-		return new Response(JSON.stringify({ error: "Could not find preloadPage URL" }), {
-		  status: 500,
-		  headers: { "Content-Type": "application/json", ...corsHeaders },
-		});
+		// No preloadPage found — fallback to HTML text scraping
+		const bodyMatch = pageHTML.match(/<div class="markdown-preview-view">([\s\S]+?)<\/div>/i);
+		if (bodyMatch) {
+		  const textOnly = bodyMatch[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+		  return new Response(
+			JSON.stringify({
+			  term: query,
+			  usageTypes: [],
+			  potency: 0,
+			  valency: 0,
+			  fallback: textOnly,
+			  fall: textOnly,
+			  markdown: textOnly,
+			  coordinate: outerUrl,
+			  links: [],
+			}),
+			{
+			  headers: { "Content-Type": "application/json", ...corsHeaders },
+			}
+		  );
+		} else {
+		  return new Response(JSON.stringify({ error: "Could not extract readable content" }), {
+			status: 500,
+			headers: { "Content-Type": "application/json", ...corsHeaders },
+		  });
+		}
 	  }
   
 	  const filename = preloadMatch[1].split('/').pop();
