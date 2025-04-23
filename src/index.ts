@@ -63,7 +63,7 @@ const corsHeaders = {
 	  }
   
 	  const filename = preloadMatch[1].split('/').pop();
-	  const preloadUrl = `https://www.carpvs.com/lexDefs/${filename}`;
+	  const preloadUrl = `https://www.carpvs.com/${filename}`;
 	  let mdContent;
   
 	  try {
