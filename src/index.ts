@@ -100,10 +100,7 @@ const corsHeaders = {
   
 	  let clean = "";
 	  let fall = "";
-	  if (filename.endsWith(".md")) {
-		clean = mdContent.replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
-		fall = clean.trim();
-	  } else {
+	  if (mdContent.startsWith("<!doctype") || mdContent.startsWith("<html")) {
 		const bodyMatch = mdContent.match(/<div class="markdown-preview-view">([\s\S]+?)<\/div>/i);
 		if (bodyMatch) {
 		  const textOnly = bodyMatch[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
@@ -113,6 +110,9 @@ const corsHeaders = {
 		  clean = "";
 		  fall = "(This appears to be a non-Markdown page or an invalid lexDef file.)";
 		}
+	  } else {
+		clean = mdContent.replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
+		fall = clean.trim();
 	  }
 	  const strictRegex = /lexDef\s+"([^"]+)"\s+{usage:::+\s*([^}]+)}/i;
 	  const footnoteRegex = /\[\^\w+]:\s*lexDef\s*{usage:::+\s*([^}]+)}\s*(.*?)\s*(?=\[\^|\n|$)/i;
