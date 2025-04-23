@@ -77,7 +77,7 @@ const corsHeaders = {
 	  }
   
 	  const clean = mdContent.replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
-	  const fall = mdContent
+	  const fall = mdContent.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 	  const strictRegex = /lexDef\s+"([^"]+)"\s+{usage:::+\s*([^}]+)}/i;
 	  const footnoteRegex = /\[\^\w+]:\s*lexDef\s*{usage:::+\s*([^}]+)}\s*(.*?)\s*(?=\[\^|\n|$)/i;
   
