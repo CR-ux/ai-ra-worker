@@ -80,32 +80,47 @@ const corsHeaders = {
 		// Try extracting from published site content
 		const renderedMatch = pageHTML.match(/<div class="markdown-preview-sizer markdown-preview-section"[^>]*>((?:.|\n)*?)<\/div>\s*<\/div>\s*<\/div>/i);
 		if (renderedMatch) {
-		  // Parse the inner HTML of the markdown-preview-sizer section
+		  // Use DOMParser to parse and convert to markdown-like content
 		  const parser = new DOMParser();
-		  const parsedDoc = parser.parseFromString(renderedMatch[1], 'text/html');
-		  const allChildren = parsedDoc.body.children;
-		  const joinedText = Array.from(allChildren)
-			.map(el => el.textContent?.trim() || '')
-			.filter(Boolean)
-			.join('\n\n')
-			.trim();
+		  const parsedDoc = parser.parseFromString(`<div>${renderedMatch[1]}</div>`, 'text/html');
+		  const markdownRoot = parsedDoc.querySelector("div");
 
-		  return new Response(
-			JSON.stringify({
-			  term: query,
-			  usageTypes: [],
-			  potency: 0,
-			  valency: 0,
-			  fallback: joinedText,
-			  fall: joinedText,
-			  markdown: joinedText,
-			  coordinate: outerUrl,
-			  links: [],
-			}),
-			{
-			  headers: { "Content-Type": "application/json", ...corsHeaders },
-			}
-		  );
+		  if (markdownRoot) {
+			const cleanMarkdown = Array.from(markdownRoot.children)
+			  .map((el) => {
+				const tag = el.tagName.toLowerCase();
+				const text = el.textContent?.trim() || '';
+				if (!text) return '';
+				if (tag === 'h1') return `# ${text}`;
+				if (tag === 'h2') return `## ${text}`;
+				if (tag === 'h3') return `### ${text}`;
+				if (tag === 'p') return text;
+				if (tag === 'ul') {
+				  return Array.from(el.querySelectorAll('li')).map(li => `- ${li.textContent?.trim() || ''}`).join('\n');
+				}
+				return text;
+			  })
+			  .filter(Boolean)
+			  .join('\n\n')
+			  .trim();
+
+			return new Response(
+			  JSON.stringify({
+				term: query,
+				usageTypes: [],
+				potency: 0,
+				valency: 0,
+				fallback: cleanMarkdown,
+				fall: cleanMarkdown,
+				markdown: cleanMarkdown,
+				coordinate: outerUrl,
+				links: [],
+			  }),
+			  {
+				headers: { "Content-Type": "application/json", ...corsHeaders },
+			  }
+			);
+		  }
 		}
 		else {
 		  return new Response(JSON.stringify({ error: "Could not extract readable content" }), {
