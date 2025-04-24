@@ -78,7 +78,7 @@ const corsHeaders = {
 		  );
 		} 
 		// Try extracting from published site content
-		const renderedMatch = pageHTML.match(/<div class="markdown-preview-sizer markdown-preview-section"[^>]*>([\s\S]+?)<div class="el-section">/i);
+		const renderedMatch = pageHTML.match(/<div class="markdown-preview-sizer markdown-preview-section"[^>]*>([\s\S]+?)<\/div><\/div><\/div>/i);
 		if (renderedMatch) {
 		  const contentHTML = renderedMatch[1];
 		  const textOnly = contentHTML.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
