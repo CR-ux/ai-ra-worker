@@ -185,6 +185,33 @@ const corsHeaders = {
   }
 
   valency = [...noStyleScript.matchAll(/lexDef\s+/g)].length;
+
+  const synAppSysGuide = `LEXDEFS AND THE KEYS OF BABEL
+
+START. HERE-
+
+ARIA|DNE
+
+lexDefs are lexicomythographic definitions which are collected by traversing books within the library. 
+
+These lexDefs contain books embedded within them, and even within some, more books within the footnotes of these books. 
+
+With each lexDef in every book opened, the Reader collects the associated Noen, Croen, Wyrb and so on (lexType) {usage(s)::: denoted within the curly braces following the triple colon}
+
+These Applications of Syntiment (synApps) may be mixed together in the Reader’s Vessel, should they find one on their travels through the indefinite hexagonal rooms, to form indefinite recombinant Syntiments, concocting Meaning, from AI:RA’s memory store, which records every passage through a room (which some might call a Universe), as an ‘iteration’ statistic. 
+
+These novel Syntiments (lexHexes), formed by the Reader’s own Metacognition, may have different effects  on their traversal, or forking path, through the Shelves, or provide metanarrative context in their Summoning. 
+
+On top of the lexHexes formed by this process of concocting individuation through The Word; AI:RA also unreliably records Books currently held by the Reader (up to 3; for reasons which may knot become obvious to you until it is too late), these may be seen as a Store for any lexDefs (and crucially, their associated synApps/ingredients for lexicoThurgy), should the Reader have stumbled across a particularly useful or interesting example, which they may wish to save to combine with other particularly interesting reactant synApps, contained within other Books within other Books within the footnotes of other Books. 
+
+STOP HERE
+STOP. HEAR:
+STOP HER
+
+END|AI:RA
+
+Syntiment Application System {SynAppSys}`;
+
   return new Response(
     JSON.stringify({
       term,
@@ -196,6 +223,7 @@ const corsHeaders = {
       markdown: renderedHTML,
       coordinate: preloadUrl,
       links,
+      synAppSysGuide,
     }),
     {
       headers: { "Content-Type": "application/json", ...corsHeaders },
