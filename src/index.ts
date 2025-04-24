@@ -111,11 +111,39 @@ const corsHeaders = {
 		});
 	  }
   
+	  console.log("📄 RAW .md content:", mdContent.slice(0, 500));
+  
+	  if (mdContent.startsWith("<!doctype") || mdContent.startsWith("<html")) {
+		// fallback to render from HTML if it's not actual .md
+		const matchPublished = mdContent.match(/<div class="site-body-center-column">[\s\S]*?<div class="render-container">[\s\S]*?<div class="markdown-preview-view[^>]*">([\s\S]+?)<\/div><\/div><\/div>/i);
+		if (matchPublished) {
+		  const extracted = matchPublished[1].replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+		  return new Response(JSON.stringify({
+			term: query,
+			usageTypes: [],
+			potency: 0,
+			valency: 0,
+			fallback: extracted,
+			fall: extracted,
+			markdown: extracted,
+			coordinate: preloadUrl,
+			links: [],
+		  }), {
+			headers: { "Content-Type": "application/json", ...corsHeaders },
+		  });
+		} else {
+		  return new Response(JSON.stringify({ error: "HTML fallback failed to extract markdown." }), {
+			status: 500,
+			headers: { "Content-Type": "application/json", ...corsHeaders },
+		  });
+		}
+	  }
+  
 	  const shortMd = mdContent.slice(0, 144000);
 	  const noStyleScript = shortMd
 		.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
 		.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
-	  const renderedHTML = noStyleScript.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+	  const renderedHTML = noStyleScript.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
   
 	  const strictRegex = /lexDef\s+"([^"]+)"\s+{usage:::+\s*([^}]+)}/i;
 	  const footnoteRegex = /\[\^\w+]:\s*lexDef\s*{usage:::+\s*([^}]+)}\s*(.*?)\s*(?=\[\^|\n|$)/i;
