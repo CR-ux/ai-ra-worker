@@ -80,17 +80,25 @@ const corsHeaders = {
 		// Try extracting from published site content
 		const renderedMatch = pageHTML.match(/<div class="markdown-preview-sizer markdown-preview-section"[^>]*>((?:.|\n)*?)<\/div>\s*<\/div>\s*<\/div>/i);
 		if (renderedMatch) {
-		  const contentHTML = renderedMatch[1];
-		  const textOnly = contentHTML.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+		  // Parse the inner HTML of the markdown-preview-sizer section
+		  const parser = new DOMParser();
+		  const parsedDoc = parser.parseFromString(renderedMatch[1], 'text/html');
+		  const allChildren = parsedDoc.body.children;
+		  const joinedText = Array.from(allChildren)
+			.map(el => el.textContent?.trim() || '')
+			.filter(Boolean)
+			.join('\n\n')
+			.trim();
+
 		  return new Response(
 			JSON.stringify({
 			  term: query,
 			  usageTypes: [],
 			  potency: 0,
 			  valency: 0,
-			  fallback: textOnly,
-			  fall: textOnly,
-			  markdown: textOnly,
+			  fallback: joinedText,
+			  fall: joinedText,
+			  markdown: joinedText,
 			  coordinate: outerUrl,
 			  links: [],
 			}),
