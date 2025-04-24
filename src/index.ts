@@ -55,42 +55,45 @@ const corsHeaders = {
   
 	  const preloadMatch = pageHTML.match(/window\.preloadPage\s*=\s*\w+\("([^"]+)"/);
 	  if (!preloadMatch) {
-		const bodyMatch = pageHTML.match(/<div class="markdown-preview-view">([\s\S]+?)<\/div>/i);
-		if (bodyMatch) {
-		  const textOnly = bodyMatch[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+		// Enhanced Cheerio-style fallback for HTML extraction and metadata
+		const cheerio = require("cheerio");
+		const $ = cheerio.load(pageHTML);
+		let extractedText = "";
+
+		// Try grabbing the div.markdown-preview-view first
+		const previewView = $('.markdown-preview-view').html();
+		if (previewView) {
+		  extractedText = cheerio.load(previewView).text().replace(/\s+/g, " ").trim();
+		} else {
+		  // Try .markdown-preview-sizer markdown-preview-section fallback
+		  const sizer = $('.markdown-preview-sizer.markdown-preview-section').html();
+		  if (sizer) {
+			extractedText = cheerio.load(sizer).text().replace(/\s+/g, " ").trim();
+		  }
+		}
+
+		if (extractedText) {
+		  // Recalculate term, valency, links, potency from HTML
+		  const valency = [...pageHTML.matchAll(/lexDef\s+/g)].length;
+		  const wikilinks = [...pageHTML.matchAll(/\[\[([^\]]+)\]\]/g)].map(m => m[1]);
+		  const uniqueLinks = [...new Set(wikilinks)];
+		  const potency = uniqueLinks.length;
+
 		  return new Response(JSON.stringify({
 			term: query,
 			usageTypes: [],
-			potency: 0,
-			valency: 0,
-			fallback: textOnly,
-			fall: textOnly,
-			markdown: textOnly,
+			potency,
+			valency,
+			fallback: extractedText,
+			fall: extractedText,
+			markdown: extractedText,
 			coordinate: outerUrl,
-			links: [],
+			links: uniqueLinks,
 		  }), {
 			headers: { "Content-Type": "application/json", ...corsHeaders },
 		  });
 		}
-  
-		const renderedMatch = pageHTML.match(/<div class="markdown-preview-sizer markdown-preview-section"[^>]*>([\s\S]+?)<div class="el-section">/i);
-		if (renderedMatch) {
-		  const textOnly = renderedMatch[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-		  return new Response(JSON.stringify({
-			term: query,
-			usageTypes: [],
-			potency: 0,
-			valency: 0,
-			fallback: textOnly,
-			fall: textOnly,
-			markdown: textOnly,
-			coordinate: outerUrl,
-			links: [],
-		  }), {
-			headers: { "Content-Type": "application/json", ...corsHeaders },
-		  });
-		}
-  
+
 		return new Response(JSON.stringify({ error: "Could not extract readable content" }), {
 		  status: 500,
 		  headers: { "Content-Type": "application/json", ...corsHeaders },

@@ -15,5 +15,8 @@
 		"typescript": "^5.5.2",
 		"vitest": "~3.0.7",
 		"wrangler": "^4.11.0"
+	},
+	"dependencies": {
+		"cheerio": "^1.0.0"
 	}
 }
