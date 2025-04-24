@@ -118,28 +118,45 @@ const corsHeaders = {
   
 	  if (mdContent.startsWith("<!doctype") || mdContent.startsWith("<html")) {
 		// fallback to render from HTML if it's not actual .md
-		const matchPublished = mdContent.match(/<div class="markdown-preview-sizer markdown-preview-section"[^>]*>([\s\S]+?)<\/div><\/div><\/div>/i);
-		if (matchPublished) {
-		  const extracted = matchPublished[1].replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+		const cheerio = require("cheerio");
+		const $ = cheerio.load(mdContent);
+		let extractedText = "";
+
+		const previewView = $('.markdown-preview-view').html();
+		if (previewView) {
+		  extractedText = cheerio.load(previewView).text().replace(/\s+/g, " ").trim();
+		} else {
+		  const sizer = $('.markdown-preview-sizer.markdown-preview-section').html();
+		  if (sizer) {
+			extractedText = cheerio.load(sizer).text().replace(/\s+/g, " ").trim();
+		  }
+		}
+
+		if (extractedText) {
+		  const valency = [...mdContent.matchAll(/lexDef\s+/g)].length;
+		  const wikilinks = [...mdContent.matchAll(/\[\[([^\]]+)\]\]/g)].map(m => m[1]);
+		  const uniqueLinks = [...new Set(wikilinks)];
+		  const potency = uniqueLinks.length;
+
 		  return new Response(JSON.stringify({
 			term: query,
 			usageTypes: [],
-			potency: 0,
-			valency: 0,
-			fallback: extracted,
-			fall: extracted,
-			markdown: extracted,
+			potency,
+			valency,
+			fallback: extractedText,
+			fall: extractedText,
+			markdown: extractedText,
 			coordinate: preloadUrl,
-			links: [],
+			links: uniqueLinks,
 		  }), {
 			headers: { "Content-Type": "application/json", ...corsHeaders },
 		  });
-		} else {
-		  return new Response(JSON.stringify({ error: "HTML fallback failed to extract markdown." }), {
-			status: 500,
-			headers: { "Content-Type": "application/json", ...corsHeaders },
-		  });
 		}
+
+		return new Response(JSON.stringify({ error: "HTML fallback failed to extract content." }), {
+		  status: 500,
+		  headers: { "Content-Type": "application/json", ...corsHeaders },
+		});
 	  }
   
 	  const shortMd = mdContent.slice(0, 144000);
