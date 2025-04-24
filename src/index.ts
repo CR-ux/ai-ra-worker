@@ -124,7 +124,7 @@ const corsHeaders = {
 	  let clean = "";
 	  let fall = "";
 	  if (mdContent.startsWith("<!doctype") || mdContent.startsWith("<html")) {
-		const matchPublished = mdContent.match(/<div class="publish-renderer[^>]*">([\s\S]+?)<\/div><\/div><\/div>/i);
+		const matchPublished = mdContent.match(/<div class="markdown-preview-sizer markdown-preview-section"[^>]*>([\s\S]+?)<\/div><\/div><\/div>/i);
 		if (matchPublished) {
 		  const extracted = matchPublished[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 		  clean = extracted;
