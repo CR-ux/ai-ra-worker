@@ -252,7 +252,10 @@ Syntiment Application System {SynAppSys}`;
       synAppSysGuide,
     }),
     {
-      headers: { "Content-Type": "application/json", ...corsHeaders },
+      headers: {
+        "Content-Type": "application/json",
+        ...corsHeaders,
+      },
     }
   );
 	},
