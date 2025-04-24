@@ -76,7 +76,30 @@ const corsHeaders = {
 			  headers: { "Content-Type": "application/json", ...corsHeaders },
 			}
 		  );
-		} else {
+		} 
+		// Try extracting from published site content
+		const renderedMatch = pageHTML.match(/<div class="site-body-center-column">[\s\S]*?<div class="render-container">[\s\S]*?<div class="markdown-preview-view[^>]*">([\s\S]+?)<\/div><\/div><\/div>/i);
+		if (renderedMatch) {
+		  const contentHTML = renderedMatch[1];
+		  const textOnly = contentHTML.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+		  return new Response(
+			JSON.stringify({
+			  term: query,
+			  usageTypes: [],
+			  potency: 0,
+			  valency: 0,
+			  fallback: textOnly,
+			  fall: textOnly,
+			  markdown: textOnly,
+			  coordinate: outerUrl,
+			  links: [],
+			}),
+			{
+			  headers: { "Content-Type": "application/json", ...corsHeaders },
+			}
+		  );
+		}
+		else {
 		  return new Response(JSON.stringify({ error: "Could not extract readable content" }), {
 			status: 500,
 			headers: { "Content-Type": "application/json", ...corsHeaders },
