@@ -124,11 +124,11 @@ const corsHeaders = {
 	  let clean = "";
 	  let fall = "";
 	  if (mdContent.startsWith("<!doctype") || mdContent.startsWith("<html")) {
-		const bodyMatch = mdContent.match(/<div class="markdown-preview-view">([\s\S]+?)<\/div>/i);
-		if (bodyMatch) {
-		  const textOnly = bodyMatch[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-		  clean = textOnly;
-		  fall = textOnly;
+		const matchPublished = mdContent.match(/<div class="site-body-center-column">[\s\S]*?<div class="render-container">[\s\S]*?<div class="markdown-preview-view[^>]*">([\s\S]+?)<\/div><\/div><\/div>/i);
+		if (matchPublished) {
+		  const extracted = matchPublished[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+		  clean = extracted;
+		  fall = extracted;
 		} else {
 		  clean = "";
 		  fall = "(This appears to be a non-Markdown page or an invalid lexDef file.)";
