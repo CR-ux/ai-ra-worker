@@ -163,9 +163,12 @@ const corsHeaders = {
   
 	  valency = [...clean.matchAll(/lexDef\s+/g)].length;
 	  const links = [...mdContent.matchAll(/\[\[([^\]]+)\]\]/g)].map((m) => m[1]);
-  // Limit to first 144,000 characters
+  // Limit to first 144,000 characters, remove <script> and <style> tags before stripping HTML
   const shortMd = mdContent.slice(0, 144000);
-  const renderedHTML = shortMd.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+  const noStyleScript = shortMd
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
+  const renderedHTML = noStyleScript.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 return new Response(
 	JSON.stringify({
 	  term,
