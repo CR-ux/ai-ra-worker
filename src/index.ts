@@ -164,15 +164,27 @@ const corsHeaders = {
 	  valency = [...clean.matchAll(/lexDef\s+/g)].length;
 	  const links = [...mdContent.matchAll(/\[\[([^\]]+)\]\]/g)].map((m) => m[1]);
   
+	  // Limit to first 144,000 characters
+	  const shortMd = mdContent.slice(0, 144000);
+
+	  // Render using Obsidian's MarkdownRenderer
+	  const previewHtmlContainer = document.createElement("div");
+	  const markdownRenderer = (window as any).MarkdownRenderer;
+	  let renderedHTML = "";
+	  if (markdownRenderer && markdownRenderer.renderMarkdown) {
+		await markdownRenderer.renderMarkdown(shortMd, previewHtmlContainer, preloadUrl, new Component());
+		renderedHTML = previewHtmlContainer.innerHTML;
+	  }
+
 	  return new Response(
 		JSON.stringify({
 		  term,
 		  usageTypes,
 		  potency,
 		  valency,
-		  fallback,
-		  fall,
-		  markdown: mdContent,
+		  fallback: renderedHTML,
+		  fall: renderedHTML,
+		  markdown: renderedHTML,
 		  coordinate: preloadUrl,
 		  links,
 		}),
