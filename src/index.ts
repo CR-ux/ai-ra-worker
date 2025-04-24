@@ -169,21 +169,37 @@ const corsHeaders = {
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
   const renderedHTML = noStyleScript.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-return new Response(
-	JSON.stringify({
-	  term,
-	  usageTypes,
-	  potency,
-	  valency,
-	  fallback: renderedHTML,
-	  fall: renderedHTML,
-	  markdown: renderedHTML,
-	  coordinate: preloadUrl,
-	  links,
-	}),
-	{
-	  headers: { "Content-Type": "application/json", ...corsHeaders },
-	}
+
+  // Extract lexDef fields from the cleaned markdown fragment
+  const lexDefStrict = noStyleScript.match(/lexDef\s+"([^"]+)"\s+{usage:::+\s*([^}]+)}/i);
+  const lexDefFootnote = noStyleScript.match(/\[\^\w+]:\s*lexDef\s*{usage:::+\s*([^}]+)}\s*(.*?)\s*(?=\[\^|\n|$)/i);
+
+  if (lexDefStrict) {
+    term = lexDefStrict[1];
+    usageTypes = lexDefStrict[2].split("||").map((u) => u.trim());
+    potency = usageTypes.length;
+  } else if (lexDefFootnote) {
+    usageTypes = lexDefFootnote[1].split("||").map((u) => u.trim());
+    fallback = lexDefFootnote[2].trim();
+    potency = usageTypes.length;
+  }
+
+  valency = [...noStyleScript.matchAll(/lexDef\s+/g)].length;
+  return new Response(
+    JSON.stringify({
+      term,
+      usageTypes,
+      potency,
+      valency,
+      fallback: renderedHTML,
+      fall: renderedHTML,
+      markdown: renderedHTML,
+      coordinate: preloadUrl,
+      links,
+    }),
+    {
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    }
   );
 	},
   };
