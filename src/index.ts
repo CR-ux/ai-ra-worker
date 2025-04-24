@@ -164,24 +164,8 @@ const corsHeaders = {
 	  valency = [...clean.matchAll(/lexDef\s+/g)].length;
 	  const links = [...mdContent.matchAll(/\[\[([^\]]+)\]\]/g)].map((m) => m[1]);
   // Limit to first 144,000 characters
-const shortMd = mdContent.slice(0, 144000);
-
-// Render using Obsidian's MarkdownRenderer (if available in context)
-let renderedHTML = "";
-try {
-  // Try rendering markdown using the MarkdownRenderer (only works if within an Obsidian environment)
-  const previewHtmlContainer = document.createElement("div");
-  const markdownRenderer = (window as any).MarkdownRenderer;
-  if (markdownRenderer?.renderMarkdown) {
-    await markdownRenderer.renderMarkdown(shortMd, previewHtmlContainer, preloadUrl, new Component());
-    renderedHTML = previewHtmlContainer.innerHTML;
-  } else {
-    // Fallback: strip HTML tags for plain text if renderer isn't available
-    renderedHTML = shortMd.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-  }
-} catch (e) {
-  renderedHTML = shortMd.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-}
+  const shortMd = mdContent.slice(0, 144000);
+  const renderedHTML = shortMd.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 return new Response(
 	JSON.stringify({
 	  term,
