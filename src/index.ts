@@ -115,7 +115,7 @@ const corsHeaders = {
   
 	  if (mdContent.startsWith("<!doctype") || mdContent.startsWith("<html")) {
 		// fallback to render from HTML if it's not actual .md
-		const matchPublished = mdContent.match(/<div class="site-body-center-column">[\s\S]*?<div class="render-container">[\s\S]*?<div class="markdown-preview-view[^>]*">([\s\S]+?)<\/div><\/div><\/div>/i);
+		const matchPublished = mdContent.match(/<div class="markdown-preview-sizer markdown-preview-section"[^>]*>([\s\S]+?)<\/div><\/div><\/div>/i);
 		if (matchPublished) {
 		  const extracted = matchPublished[1].replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
 		  return new Response(JSON.stringify({
