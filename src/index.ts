@@ -1,3 +1,5 @@
+import index from '../../ai-ra-worker/index.json';
+const typedIndex = index as Record<string, string>;
 const corsHeaders = {
 	"Access-Control-Allow-Origin": "*",
 	"Access-Control-Allow-Methods": "GET, OPTIONS",
@@ -17,6 +19,24 @@ const corsHeaders = {
 	  if (!query) {
 		return new Response(JSON.stringify({ error: "No query provided" }), {
 		  status: 400,
+		  headers: { "Content-Type": "application/json", ...corsHeaders },
+		});
+	  }
+  
+	  // Lookup in index first
+	  if (typedIndex[query]) {
+		return new Response(JSON.stringify({
+		  term: query,
+		  usageTypes: [],
+		  potency: 0,
+		  concentration: 0,
+		  valency: 0,
+		  fallback: "",
+		  fall: "",
+		  markdown: "",
+		  coordinate: `https://raw.githubusercontent.com/CR-ux/THE-VAULT/main/${typedIndex[query]}`,
+		  links: [],
+		}), {
 		  headers: { "Content-Type": "application/json", ...corsHeaders },
 		});
 	  }
