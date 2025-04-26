@@ -5,7 +5,7 @@ const corsHeaders = {
 	"Access-Control-Allow-Methods": "GET, OPTIONS",
 	"Access-Control-Allow-Headers": "Content-Type",
   };
-  
+  //test
   export default {
 	async fetch(request: Request): Promise<Response> {
 	  if (request.method === "OPTIONS") {
