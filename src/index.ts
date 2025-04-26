@@ -38,10 +38,19 @@ const corsHeaders = {
 	  const shortContent = mdContent.slice(0, 144000) + "\n{REDACTED}";
 	  const links = [...mdContent.matchAll(/\[\[([^\]]+)\]\]/g)].map(m => m[1]);
   
+	  const allLexDefs = [...mdContent.matchAll(/lexDef\s+"([^"]+)"\s+{usage:::\s+([^}]+)}/g)];
+	  let totalPotency = 0;
+	  for (const match of allLexDefs) {
+		const usagePart = match[2];
+		const usageList = usagePart.split("||").map(u => u.trim());
+		totalPotency += usageList.length;
+	  }
+  
 	  return new Response(JSON.stringify({
 		term: query,
 		usageTypes: [],
-		potency: links.length,
+		potency: totalPotency,
+		concentration: allLexDefs.length,
 		valency: (mdContent.match(/lexDef\s+/g) || []).length,
 		fallback: shortContent,
 		fall: shortContent,
