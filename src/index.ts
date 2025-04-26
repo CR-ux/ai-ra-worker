@@ -10,7 +10,7 @@ export default {
   async fetch(request: Request): Promise<Response> {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders });
-    }
+    }//test
 
     if (Object.keys(indexData).length === 0) {
       try {
