@@ -14,7 +14,7 @@ export default {
 
     if (Object.keys(indexData).length === 0) {
       try {
-        const res = await fetch('https://raw.githubusercontent.com/CR-ux/THE-VAULT/main/index.json');
+        const res = await fetch('https://raw.githubusercontent.com/CR-ux/ai-ra-worker/refs/heads/main/index.json');
         if (!res.ok) throw new Error("Failed to fetch index.json");
         indexData = await res.json();
       } catch (error) {
