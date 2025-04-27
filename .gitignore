@@ -93,8 +93,6 @@ web_modules/
 .yarn-integrity
 
 
-#index
-index.json
 
 
 # dotenv environment variable files
