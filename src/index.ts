@@ -34,7 +34,7 @@ export default {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
-//built
+
     const resolvedPath = indexData[query];
     if (!resolvedPath) {
       return new Response(JSON.stringify({ error: "Document not found in index" }), {
@@ -44,7 +44,9 @@ export default {
     }
     const rawUrl = `https://raw.githubusercontent.com/CR-ux/THE-VAULT/main/${resolvedPath}`;
     let mdContent = "";
-
+//builtlog
+console.log('Query:', query);
+console.log('Resolved Path:', resolvedPath);
     try {
       const mdRes = await fetch(rawUrl);
       if (!mdRes.ok) throw new Error("Failed to fetch markdown file");
