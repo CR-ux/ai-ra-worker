@@ -35,7 +35,13 @@ export default {
       });
     }
 
-    const resolvedPath = indexData[query] || `${query}.md`;
+    const resolvedPath = indexData[query];
+    if (!resolvedPath) {
+      return new Response(JSON.stringify({ error: "Document not found in index" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
     const rawUrl = `https://raw.githubusercontent.com/CR-ux/THE-VAULT/main/${resolvedPath}`;
     let mdContent = "";
 
