@@ -42,7 +42,7 @@ export default {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
-    const rawUrl = `https://raw.githubusercontent.com/CR-ux/THE-VAULT/main/${resolvedPath}`;
+    const rawUrl = `https://raw.githubusercontent.com/CR-ux/THE-VAULT/main/${encodeURIComponent(resolvedPath)}`;
     let mdContent = "";
 //builtlog
 console.log('Query:', query);
