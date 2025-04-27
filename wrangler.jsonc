@@ -4,7 +4,7 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "fancy-mud-738e",
+	"name": "ai-ra-worker",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-04-15",
 	"observability": {
