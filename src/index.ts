@@ -15,7 +15,9 @@ export default {
     if (Object.keys(indexData).length === 0) {
       try {
 		const res = await fetch('https://raw.githubusercontent.com/CR-ux/THE-VAULT/main/index.json');        if (!res.ok) throw new Error("Failed to fetch index.json");
-        indexData = await res.json();
+        const rawJson = await res.json() as Record<string, string>;
+        console.log("Fetched index.json keys:", Object.keys(rawJson));
+        indexData = rawJson;
       } catch (error) {
         return new Response(JSON.stringify({ error: "Failed to fetch index.json" }), {
           status: 500,
@@ -51,6 +53,7 @@ console.log('Resolved Path:', resolvedPath);
       const mdRes = await fetch(rawUrl);
       if (!mdRes.ok) throw new Error("Failed to fetch markdown file");
       mdContent = await mdRes.text();
+      console.log("Fetched Markdown:", mdContent.slice(0, 1000));
     } catch (error) {
       return new Response(JSON.stringify({ error: "Failed to fetch file" }), {
         status: 500,
@@ -61,7 +64,8 @@ console.log('Resolved Path:', resolvedPath);
     const shortContent = mdContent.slice(0, 144000) + "\n{REDACTED}";
     const links = [...mdContent.matchAll(/\[\[([^\]]+)\]\]/g)].map(m => m[1]);
 
-    const allLexDefs = [...mdContent.matchAll(/lexDef\s+"([^"]+)"\s+{usage:::\s+([^}]+)}/g)];
+    const allLexDefs = [...mdContent.matchAll(/lexDef\s+"([^"]+)"\s*{usage:::\s*([^}]*)}\s*<\s*([^.\n]+)/g)];
+    console.log("Matched lexDefs:", allLexDefs);
     let totalPotency = 0;
     for (const match of allLexDefs) {
       const usagePart = match[2];
@@ -80,6 +84,11 @@ console.log('Resolved Path:', resolvedPath);
       markdown: shortContent,
       coordinate: rawUrl,
       links,
+      lexDefs: allLexDefs.map(m => ({
+        name: m[1],
+        usages: m[2].split("||").map(u => u.trim()),
+        defBlock: m[3].trim()
+      }))
     }), {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
