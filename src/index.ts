@@ -7,19 +7,19 @@ const corsHeaders = {
 let indexData: Record<string, string> = {};
 
 export default {
-  async fetch(request: Request): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders });
     }//test
 
     if (Object.keys(indexData).length === 0) {
       try {
-		const res = await fetch('https://raw.githubusercontent.com/CR-ux/THE-VAULT/main/index.json');        if (!res.ok) throw new Error("Failed to fetch index.json");
-        const rawJson = await res.json() as Record<string, string>;
+        const rawJson = await env.KV_INDEX.get("index.json", "json") as Record<string, string> | null;
+        if (!rawJson) throw new Error("index.json not found in KV");
         console.log("Fetched index.json keys:", Object.keys(rawJson));
         indexData = rawJson;
       } catch (error) {
-        return new Response(JSON.stringify({ error: "Failed to fetch index.json" }), {
+        return new Response(JSON.stringify({ error: "Failed to load index.json" }), {
           status: 500,
           headers: { "Content-Type": "application/json", ...corsHeaders },
         });
